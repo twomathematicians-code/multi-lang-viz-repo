@@ -1,0 +1,10 @@
+language,chart_types,popularity,performance,ease_of_use,community,web_export,year_established,developers_millions
+Python,65,95,60,95,98,70,1991,15.7
+JavaScript,55,90,50,65,95,99,1995,16.4
+C++,30,72,98,25,55,20,1985,7.3
+Java,22,65,75,50,70,45,1995,9.1
+Go,14,55,92,60,45,30,2009,3.2
+R,45,50,45,40,30,10,1993,2.8
+Julia,38,40,88,55,20,25,2012,1.2
+Gnuplot,20,25,80,35,15,5,1986,0.3
+Bash,8,40,95,20,80,0,1989,5.5

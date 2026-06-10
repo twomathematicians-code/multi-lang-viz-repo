@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Visualization Showcase — Chart.js</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .header {
+    text-align: center;
+    padding: 48px 24px 32px;
+  }
+  .header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #00d4ff;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    font-size: 1rem;
+    color: #8b949e;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .card h2 {
+    font-size: 1.05rem;
+    color: #00d4ff;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .card canvas {
+    width: 100% !important;
+    max-height: 340px;
+  }
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>JavaScript Visualization Showcase — Chart.js</h1>
+  <p>10 Interactive Charts &nbsp;|&nbsp; Chart.js v4 &nbsp;|&nbsp; Zero Dependencies</p>
+</div>
+
+<div class="grid">
+
+  <!-- 1. Bar Chart -->
+  <div class="card">
+    <h2>1. Bar Chart — Chart Type Count by Language</h2>
+    <canvas id="barChart"></canvas>
+  </div>
+
+  <!-- 2. Line Chart -->
+  <div class="card">
+    <h2>2. Line Chart — Popularity Trends (2016–2026)</h2>
+    <canvas id="lineChart"></canvas>
+  </div>
+
+  <!-- 3. Pie Chart -->
+  <div class="card">
+    <h2>3. Pie Chart — Popularity Distribution</h2>
+    <canvas id="pieChart"></canvas>
+  </div>
+
+  <!-- 4. Doughnut Chart -->
+  <div class="card">
+    <h2>4. Doughnut Chart — Community Score</h2>
+    <canvas id="doughnutChart"></canvas>
+  </div>
+
+  <!-- 5. Radar Chart -->
+  <div class="card">
+    <h2>5. Radar Chart — Top 5 Language Feature Comparison</h2>
+    <canvas id="radarChart"></canvas>
+  </div>
+
+  <!-- 6. Polar Area Chart -->
+  <div class="card">
+    <h2>6. Polar Area Chart — Performance Scores</h2>
+    <canvas id="polarChart"></canvas>
+  </div>
+
+  <!-- 7. Bubble Chart -->
+  <div class="card">
+    <h2>7. Bubble Chart — Chart Types vs Popularity (size = Performance)</h2>
+    <canvas id="bubbleChart"></canvas>
+  </div>
+
+  <!-- 8. Scatter Chart -->
+  <div class="card">
+    <h2>8. Scatter Chart — Chart Types vs Ease of Use</h2>
+    <canvas id="scatterChart"></canvas>
+  </div>
+
+  <!-- 9. Stacked Bar Chart -->
+  <div class="card">
+    <h2>9. Stacked Bar Chart — Multi-Metric Comparison</h2>
+    <canvas id="stackedBarChart"></canvas>
+  </div>
+
+  <!-- 10. Mixed Chart -->
+  <div class="card">
+    <h2>10. Mixed Chart — Bar + Line (Dual Axis)</h2>
+    <canvas id="mixedChart"></canvas>
+  </div>
+
+</div>
+
+<script>
+// ── Shared Data ──
+const languages = ['Python', 'JavaScript', 'C++', 'Java', 'Go', 'R', 'Julia', 'Gnuplot', 'Bash'];
+const chartTypes = [65, 55, 30, 22, 14, 45, 38, 20, 8];
+const popularity = [95, 90, 72, 65, 55, 50, 40, 25, 40];
+const performance = [60, 50, 98, 75, 92, 45, 88, 70, 85];
+const easeOfUse = [95, 65, 25, 50, 60, 40, 55, 35, 20];
+const community = [98, 95, 55, 70, 45, 30, 20, 15, 80];
+const webExport = [70, 99, 20, 45, 30, 10, 25, 5, 0];
+const colors = ['#2ecc71','#3498db','#e74c3c','#f39c12','#00bcd4','#9b59b6','#ff6b6b','#1abc9c','#795548'];
+
+const years = [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026];
+const pyTrend   = [70,73,78,82,88,92,94,95,96,97,98];
+const jsTrend   = [75,78,82,85,88,90,92,94,95,96,97];
+const cppTrend  = [78,78,77,76,75,74,73,72,72,72,72];
+const javaTrend = [80,78,75,72,68,65,62,60,58,56,54];
+const goTrend   = [20,28,38,48,55,62,68,72,75,78,80];
+
+// ── Global Chart.js Defaults ──
+Chart.defaults.color = '#c9d1d9';
+Chart.defaults.borderColor = '#30363d';
+Chart.defaults.plugins.legend.labels.color = '#c9d1d9';
+Chart.defaults.plugins.tooltip.backgroundColor = '#161b22';
+Chart.defaults.plugins.tooltip.titleColor = '#00d4ff';
+Chart.defaults.plugins.tooltip.bodyColor = '#c9d1d9';
+Chart.defaults.plugins.tooltip.borderColor = '#30363d';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+// ── 1. Bar Chart ──
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: languages,
+    datasets: [{
+      label: 'Chart Types Supported',
+      data: chartTypes,
+      backgroundColor: colors,
+      borderColor: colors.map(c => c),
+      borderWidth: 1,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: true } },
+    scales: {
+      x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+      y: { beginAtZero: true, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+    }
+  }
+});
+
+// ── 2. Line Chart ──
+new Chart(document.getElementById('lineChart'), {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: [
+      { label: 'Python',     data: pyTrend,   borderColor: '#2ecc71', backgroundColor: 'rgba(46,204,113,0.1)', fill: false, tension: 0.3 },
+      { label: 'JavaScript',  data: jsTrend,   borderColor: '#f39c12', backgroundColor: 'rgba(243,156,18,0.1)',  fill: false, tension: 0.3 },
+      { label: 'C++',         data: cppTrend,  borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.1)',   fill: false, tension: 0.3 },
+      { label: 'Java',        data: javaTrend, borderColor: '#3498db', backgroundColor: 'rgba(52,152,219,0.1)',  fill: false, tension: 0.3 },
+      { label: 'Go',          data: goTrend,   borderColor: '#00bcd4', backgroundColor: 'rgba(0,188,212,0.1)',   fill: false, tension: 0.3 },
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: true } },
+    scales: {
+      x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+      y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+    }
+  }
+});
+
+// ── 3. Pie Chart ──
+new Chart(document.getElementById('pieChart'), {
+  type: 'pie',
+  data: {
+    labels: languages,
+    datasets: [{
+      data: popularity,
+      backgroundColor: colors,
+      borderColor: '#161b22',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'right', display: true } }
+  }
+});
+
+// ── 4. Doughnut Chart ──
+new Chart(document.getElementById('doughnutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: languages,
+    datasets: [{
+      data: community,
+      backgroundColor: colors,
+      borderColor: '#161b22',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'right', display: true } }
+  }
+});
+
+// ── 5. Radar Chart (top 5 languages) ──
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['Chart Types', 'Popularity', 'Performance', 'Ease of Use', 'Community', 'Web Export'],
+    datasets: [
+      { label: 'Python',     data: [chartTypes[0], popularity[0], performance[0], easeOfUse[0], community[0], webExport[0]], borderColor: '#2ecc71', backgroundColor: 'rgba(46,204,113,0.15)',  pointBackgroundColor: '#2ecc71' },
+      { label: 'JavaScript', data: [chartTypes[1], popularity[1], performance[1], easeOfUse[1], community[1], webExport[1]], borderColor: '#f39c12', backgroundColor: 'rgba(243,156,18,0.15)',  pointBackgroundColor: '#f39c12' },
+      { label: 'C++',        data: [chartTypes[2], popularity[2], performance[2], easeOfUse[2], community[2], webExport[2]], borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.15)',   pointBackgroundColor: '#e74c3c' },
+      { label: 'Java',       data: [chartTypes[3], popularity[3], performance[3], easeOfUse[3], community[3], webExport[3]], borderColor: '#3498db', backgroundColor: 'rgba(52,152,219,0.15)',  pointBackgroundColor: '#3498db' },
+      { label: 'Go',         data: [chartTypes[4], popularity[4], performance[4], easeOfUse[4], community[4], webExport[4]], borderColor: '#00bcd4', backgroundColor: 'rgba(0,188,212,0.15)',   pointBackgroundColor: '#00bcd4' },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: true } },
+    scales: {
+      r: {
+        beginAtZero: true,
+        max: 100,
+        ticks: { color: '#8b949e', backdropColor: 'transparent' },
+        grid: { color: '#30363d' },
+        pointLabels: { color: '#c9d1d9' },
+        angleLines: { color: '#30363d' }
+      }
+    }
+  }
+});
+
+// ── 6. Polar Area Chart ──
+new Chart(document.getElementById('polarChart'), {
+  type: 'polarArea',
+  data: {
+    labels: languages,
+    datasets: [{
+      data: performance,
+      backgroundColor: colors.map(c => c + '99'),
+      borderColor: colors,
+      borderWidth: 1,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'right', display: true } },
+    scales: {
+      r: {
+        beginAtZero: true,
+        ticks: { color: '#8b949e', backdropColor: 'transparent' },
+        grid: { color: '#30363d' }
+      }
+    }
+  }
+});
+
+// ── 7. Bubble Chart ──
+new Chart(document.getElementById('bubbleChart'), {
+  type: 'bubble',
+  data: {
+    datasets: languages.map((lang, i) => ({
+      label: lang,
+      data: [{ x: chartTypes[i], y: popularity[i], r: performance[i] / 10 }],
+      backgroundColor: colors[i] + 'AA',
+      borderColor: colors[i],
+    }))
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'right', display: true } },
+    scales: {
+      x: { title: { display: true, text: 'Chart Types', color: '#8b949e' }, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+      y: { title: { display: true, text: 'Popularity', color: '#8b949e' }, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+    }
+  }
+});
+
+// ── 8. Scatter Chart ──
+new Chart(document.getElementById('scatterChart'), {
+  type: 'scatter',
+  data: {
+    datasets: languages.map((lang, i) => ({
+      label: lang,
+      data: [{ x: chartTypes[i], y: easeOfUse[i] }],
+      backgroundColor: colors[i],
+      borderColor: colors[i],
+      pointRadius: 8,
+      pointHoverRadius: 12,
+    }))
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'right', display: true } },
+    scales: {
+      x: { title: { display: true, text: 'Chart Types', color: '#8b949e' }, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+      y: { title: { display: true, text: 'Ease of Use', color: '#8b949e' }, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+    }
+  }
+});
+
+// ── 9. Stacked Bar Chart ──
+new Chart(document.getElementById('stackedBarChart'), {
+  type: 'bar',
+  data: {
+    labels: languages,
+    datasets: [
+      { label: 'Chart Types', data: chartTypes,   backgroundColor: '#2ecc71', borderRadius: 2 },
+      { label: 'Popularity',  data: popularity,  backgroundColor: '#3498db', borderRadius: 2 },
+      { label: 'Performance', data: performance, backgroundColor: '#e74c3c', borderRadius: 2 },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: true } },
+    scales: {
+      x: { stacked: true, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+      y: { stacked: true, beginAtZero: true, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+    }
+  }
+});
+
+// ── 10. Mixed Chart (Bar + Line, dual axis) ──
+new Chart(document.getElementById('mixedChart'), {
+  type: 'bar',
+  data: {
+    labels: languages,
+    datasets: [
+      {
+        type: 'bar',
+        label: 'Chart Types',
+        data: chartTypes,
+        backgroundColor: '#2ecc71AA',
+        borderColor: '#2ecc71',
+        borderWidth: 1,
+        borderRadius: 6,
+        yAxisID: 'y',
+      },
+      {
+        type: 'line',
+        label: 'Popularity',
+        data: popularity,
+        borderColor: '#00d4ff',
+        backgroundColor: 'rgba(0,212,255,0.1)',
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#00d4ff',
+        fill: false,
+        yAxisID: 'y1',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: true } },
+    scales: {
+      x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+      y: {
+        type: 'linear',
+        position: 'left',
+        beginAtZero: true,
+        title: { display: true, text: 'Chart Types', color: '#2ecc71' },
+        ticks: { color: '#8b949e' },
+        grid: { color: '#21262d' }
+      },
+      y1: {
+        type: 'linear',
+        position: 'right',
+        beginAtZero: true,
+        max: 100,
+        title: { display: true, text: 'Popularity', color: '#00d4ff' },
+        ticks: { color: '#8b949e' },
+        grid: { drawOnChartArea: false }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
